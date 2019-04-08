@@ -1,0 +1,24 @@
+{% extends "dashboard/dashboard_layout.html" %}
+{% block content %}
+<div class="jumbotron bg-light">
+    <h1 class="display-4">Edit Category</h1>
+    <hr class="my-4">
+    <form action="" method="post" id="form">
+        {{ form.hidden_tag() }}
+        <div class="form-group">
+            {{ form.name.label(class="form-control-label") }}
+            {% if form.name.errors %}
+            {{ form.name(class="form-control form-control-lg is-invalid") }}
+            <div class="invalid-feedback">
+                {% for error in form.name.errors %}
+                <span>{{ error }}</span>
+                {% endfor %}
+            </div>
+            {% else %}
+            {{ form.name(class="form-control form-control") }}
+            {% endif %}
+        </div>
+        {{ form.submit(class="btn btn-outline-info btn-block btn-lg mt-4", value="Save") }}
+    </form>
+</div>
+{% endblock content %}

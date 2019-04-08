@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+{# this file will be used for template inheritance
+for more information about that check this:
+http://jinja.pocoo.org/docs/2.10/templates/#template-inheritance
+#}
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    {#
+    this will check 
+    if there's a title from the backend
+    it will set it as the title 
+    #}
+
+    {% if title %}
+    <title>{{ title }}</title>
+    {% else %}
+    <title>Item Catalog</title>
+    {% endif %}
+    <!-- Bootstrap latest version -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <!-- custom style -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {# google api platform.js with query #}
+    <script src="https://apis.google.com/js/platform.js?onload=init" async defer></script>
+<script>
+    // this vairable will take a promise from auth2 init
+    // check this:
+    // https://developers.google.com/identity/sign-in/web/reference#gapiauth2initwzxhzdk19paramswzxhzdk20 #}
+    var auth2Init = null;
+    function init() {
+        gapi.load('auth2', () => {
+            // initialize the api client
+            auth2Init = gapi.auth2.init({
+                client_id: "905113511477-0t0jur00mp375qtvhtnca19v97mmtvao.apps.googleusercontent.com"
+            });
+
+            {# if this function is exists #}
+            if (typeof invokePromise === "function") {
+                // call it with the auth2Init variable
+                invokePromise(auth2Init);
+            }
+        });
+    }
+    // call init function
+    init();
+</script>
+
+    {# some templates will have additional scripts to the head tag #}
+    {# so this will take care of that #}
+    {% block head %}{% endblock %}
+</head>
+
+<body>
+    <!-- navbar here -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-secondary">
+        <div class="container col-md-9">
+            <a class="navbar-brand text-light" href="{{ url_for('main') }}">Catalog</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#toggle" aria-controls="toggle"
+                aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="toggle">
+                <!-- left links -->
+                <ul class="navbar-nav mr-auto nav-pills">
+                    <li class="nav-item">
+                        <a class="nav-link text-light {{ main }}" href="{{ url_for('main') }}">Home</a>
+                    </li>
+                </ul>
+                <!-- right links -->
+                <ul class="navbar-nav my-auto nav-pills">
+                {# if the current user is authenticated #}
+                    {% if current_user.is_authenticated %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown"
+                            aria-haspopup="true" aria-expanded="false">
+                            {# show his avatar and username #}
+                            <img src="{{ url_for('static', filename='avatars/{}'.format(current_user.avatar)) }}" alt="{{ current_user.username }}"
+                                class="rounded-circle top-avatar">
+                            {{ current_user.username }}
+                        </a>
+                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <a class="dropdown-item {{ dashboard }}" href="{{ url_for('dashboard') }}">Dashboard</a>
+                            <div class="dropdown-divider"></div>
+                            {# sign out
+                            when click this
+                            will fire signOut
+                            function to log out the user from google
+                            and then from the site #}
+                            <a class="dropdown-item" href="{{ url_for('signOut') }}" onclick="signOut();">Sign
+                                Out</a>
+                        </div>
+                    </li>
+                    {% else %}
+                    {# user is not logged in #}
+                    <li class="nav-item">
+                    {# show sign in #}
+                        <a class="nav-link text-light {{ sign_in }}" href="{{ url_for('signIn') }}">Sign in</a>
+                    </li>
+                    {# show sign up #}
+                    <li class="nav-item">
+                        <a class="nav-link text-light {{ sign_up }}" href="{{ url_for('signUp') }}">Sign up</a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+    <!-- content here -->
+    <div class="container mt-5" id="container">
+        {# javascript will use this div #}
+        <div id="content"></div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {# if there's a message from flash #}
+        {% if messages %}
+        {# show that message with category #}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }} col-md-9 m-auto">
+            {{ message }}
+        </div>
+        <br>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+        {# all the content will be here #}
+        {% block content %}{% endblock %}
+    </div>
+    <!-- Jquery -->
+    <script src="{{ url_for('static', filename='js/jquery-3.3.1.min.js') }}"></script>
+    <!-- Popper -->
+    <script src="{{ url_for('static', filename='js/popper.min.js') }}"></script>
+    <!-- Bootstrap -->
+    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    {# some templates will have a custom script  #}
+    {% block endBody %}{% endblock %}
+    <!-- required by google -->
+    <script>
+        {# this function will logout the user from google
+        check this for more information:
+        https://developers.google.com/identity/sign-in/web/reference#googleauthsignout
+        #}
+        function signOut() {
+            var auth2 = gapi.auth2.getAuthInstance();
+            auth2.signOut().then(() => {
+                console.log('User signed out.');
+            });
+        }
+
+    </script>
+</body>
+
+</html>

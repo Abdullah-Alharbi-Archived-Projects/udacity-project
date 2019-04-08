@@ -1,0 +1,55 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="jumbotron bg-light">
+    <h1 class="display-4">{{ item.name }}
+        <span class="float-right" style="font-size: 18px;">
+            Created At: {{ created_at }} <br>
+            By: {{ item.category.author.username }}
+        </span>
+    </h1>
+    {# if the user logged in and the item was created from user
+    can edit or delete the item #}
+    {% if current_user.is_authenticated and item.category.user_id == current_user.id %}
+    {% block head %}
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.4.0/css/font-awesome.min.css" rel="stylesheet"
+        type="text/css" />
+    {% endblock head %}
+
+    <div class="actions float-right">
+        <a href="{{ url_for('editItemById', t_id=item.id, c_id=item.category.id) }}" class="btn btn-secondary btn-sm"
+            data-toggle="tooltip" data-placement="bottom" title="Edit">
+            <i class="fa fa-edit"></i>
+        </a>
+        <a href="{{ url_for('deleteItemById', t_id=item.id, c_id=item.category.id) }}" id="delete" class="btn btn-danger btn-sm"
+            data-toggle="tooltip" data-placement="top" title="Delete">
+            <i class="fa fa-trash"></i>
+        </a>
+    </div>
+        {% block endBody %}
+<script>
+    $(function () {
+        $('[data-toggle="tooltip"]').tooltip()
+    });
+
+    $("#delete").on("click", function (e) {
+        e.preventDefault();
+        ask = confirm("Hey {{ current_user.username }}, are you sure to delete this item ?");
+        {# if the user clicked on `ok` confirm function will return true #}
+        if (ask) {
+            window.location.href = $(this).attr("href");
+        } else {
+            window.location.href = window.location.href;
+        }
+    });
+</script>
+    {% endblock endBody %}
+
+    {% endif %}
+    <hr class="my-4">
+    {# for more information about safe:
+    http://jinja.pocoo.org/docs/2.10/templates/#working-with-automatic-escaping
+    #}
+    {{ item.description|safe }}
+</div>
+{% endblock content %}

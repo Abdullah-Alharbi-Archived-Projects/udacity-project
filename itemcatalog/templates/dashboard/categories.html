@@ -1,0 +1,92 @@
+{% extends "dashboard/dashboard_layout.html" %}
+{% set categories = "active" %}
+
+{% block head %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.4.0/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+{% endblock head %}
+
+
+{% block content %}
+<div class="jumbotron bg-light">
+    <h1 class="display-4">Categories <span class="badge badge-primary">{{ current_user.categories.count() }}</span></h1>
+    <hr class="my-4">
+    {% if current_user.categories.count() > 0 %}
+    <table class="table table-hover">
+        <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Category Name</th>
+                <th scope="col">Items Count</th>
+                <th scope="col">Created At</th>
+                <th scope="col">Actions</th>
+
+                <th scope="col">
+                    <div class="dropdown">
+                        <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButton"
+                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                            Sort By
+                        </button>
+                        <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                            <a class="dropdown-item {{ 'active' if sort_by == 'latest' else ''  }}" href="{{ url_for(request.endpoint) }}?sort_by=latest">Latest</a>
+                            <a class="dropdown-item {{ 'active' if sort_by == 'older' else ''  }}" href="{{ url_for(request.endpoint) }}?sort_by=older">Older</a>
+                        </div>
+                    </div>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for category in categories_list %}
+            <tr>
+                <td>{{ category.id }}</td>
+                <td>{{ category.name }}</td>
+                <td>{{ category.items.count() }}</td>
+                <td>{{ category.created_at }}</td>
+                <td>
+                    <a href="{{ url_for('category', c_id=category.id) }}" class="btn btn-primary btn-sm" data-toggle="tooltip"
+                        data-placement="left" title="View">
+                        <fa class="fa fa-eye"></fa>
+                    </a>
+                    <a href="{{ url_for('editCategoryById', c_id=category.id) }}" class="btn btn-secondary btn-sm"
+                        data-toggle="tooltip" data-placement="bottom" title="Edit">
+                        <fa class="fa fa-edit"></fa>
+                    </a>
+                    <a href="{{ url_for('deleteCategoryById', c_id=category.id) }}" class="btn btn-danger btn-sm" id="delete"
+                        data-toggle="tooltip" data-placement="top" title="Delete">
+                        <fa class="fa fa-trash"></fa>
+                    </a>
+                </td>
+                <td></td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% else %}
+    <h3>Sorry you don't have any categories yet.
+        <a href="{{ url_for('addCategory') }}">Create Category</a>
+    </h3>
+    {% endif %}
+</div>
+{% endblock content %}
+
+{% block endBody %}
+<script>
+    $(function () {
+        $('[data-toggle="tooltip"]').tooltip()
+    });
+
+    var btns = document.querySelectorAll("#delete");
+
+    btns.forEach((element, key) => {
+        element.addEventListener("click", function () {
+            ask = confirm("Hey {{ current_user.username }}, are you sure to delete this category with items ?");
+            if (ask) {
+                window.location.href = $(this).attr("href");
+            } else {
+                // this will automatically refresh the page 
+                window.location.href = window.location.href;
+            }
+        });
+    });
+</script>
+{% endblock endBody %}

@@ -1,0 +1,28 @@
+{# check layout.html for more information about template inheritance #}
+{% extends "layout.html" %}
+{#
+there's a couple of variables in the navbar
+when user visits any page the page will set up one
+of the variables to active
+i know this is not good thing but
+since this is a small project i used that 😂
+#}
+{% set main = "active" %}
+{% block content %}
+<div class="jumbotron col-md-8 bg-light">
+    <h1 class="display-4">Categories</h1>
+    <hr class="my-4">
+    {# if there's categories render them #}
+    {% if categories.count > 0 %}
+    <ul>
+        {% for category in categories %}
+        <li><a href="{{ url_for('category', c_id=category.id) }}">{{ category.name }} <span class="badge badge-secondary badge-pill">{{
+                    category.items.count() }}</span></a></li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    {# or show this #}
+    <h3>There's no categories yet.</h3>
+    {% endif %}
+</div>
+{% endblock content %}

@@ -1,0 +1,11 @@
+{% extends "dashboard/dashboard_layout.html" %}
+{% set statistics = "active" %}
+
+{% block content %}
+<div class="jumbotron bg-light">
+    <h1 class="display-4">Statistics</h1>
+    <hr class="my-4">
+    <h3>Categories Count: {{ current_user.categories.count() }}</h3>
+    <h3>Items Count: {{ items_count }}</h3>
+</div>
+{% endblock content %}

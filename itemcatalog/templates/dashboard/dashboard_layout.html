@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    {% if title %}
+    <title>Dashboard - {{ title }}</title>
+    {% else %}
+    <title>Item Catalog - Dashboard</title>
+    {% endif %}
+    <!-- Bootstrap latest version -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
+    <!-- custom style -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script src="https://apis.google.com/js/platform.js?onload=init" async defer></script>
+    <script>
+        function init() {
+            gapi.load('auth2', () => {
+                gapi.auth2.init({
+                    client_id: "905113511477-0t0jur00mp375qtvhtnca19v97mmtvao.apps.googleusercontent.com"
+                });
+            });
+        }
+        init();
+    </script>
+    {% block head %}{% endblock %}
+</head>
+
+<body>
+    <!-- content here -->
+    <div class="left_nav float-left">
+        <h1 class="text-center mb-5 text-light position-relative">
+            <img src="{{ url_for('static', filename='avatars/{}'.format(current_user.avatar)) }}" alt="{{ current_user.username }}"
+                class="rounded-circle mt-4" width="120px">
+            <br>
+            {{ current_user.username }}
+            <hr class="bg-light" style="border-style: outset;border-width: 3px;">
+            <span id="dash-email">{{ current_user.email }}</span>
+        </h1>
+        <ul class="nav nav-pills flex-column">
+            <li class="nav-item">
+                <a class="nav-link text-light" href="{{ url_for('main') }}">Main Page</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-light {{ statistics }}" href="{{ url_for('dashboard') }}">Statistics</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-light {{ add_category }}" href="{{ url_for('addCategory') }}">Add Category</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-light {{ add_item }}" href="{{ url_for('addItem') }}">Add Item</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-light {{ categories }}" href="{{ url_for('categories') }}">
+                    Categories
+                    <span class="badge badge-pill badge-primary float-right size-10">
+                        {{ current_user.categories.count()}}
+                    </span>
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-light {{ profile }}" href="{{ url_for('profile') }}">Profile</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link text-danger" href="{{ url_for('signOut') }}" onclick="signOut();">Sign out</a>
+            </li>
+        </ul>
+    </div>
+    <div class="container mt-5">
+        <div class="row">
+            <div class="col-md-2 z-1"></div>
+            <div class="col-md-10">
+                <!-- flash messages -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                {% for category, message in messages %}
+                <div class="alert alert-{{ category }} col-md-9 m-auto">
+                    {{ message }}
+                </div>
+                <br>
+                {% endfor %}
+                {% endif %}
+                {% endwith %}
+                <!-- content -->
+                {% block content %}{% endblock %}
+            </div>
+            <!-- <div class="c"></div> -->
+        </div>
+    </div>
+
+    <!-- Jquery -->
+    <script src="{{ url_for('static', filename='js/jquery-3.2.1.slim.min.js') }}"></script>
+    <!-- Popper -->
+    <script src="{{ url_for('static', filename='js/popper.min.js') }}"></script>
+    <!-- Bootstrap -->
+    <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
+    {% block endBody %}{% endblock %}
+    <!-- Custom Vanila javascript -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+    <script>
+
+        function signOut() {
+            var auth2 = gapi.auth2.getAuthInstance();
+            auth2.signOut().then(() => {
+                console.log('User signed out.');
+            });
+        }
+
+    </script>
+</body>
+
+</html>

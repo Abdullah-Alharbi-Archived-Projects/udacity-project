@@ -1,0 +1,282 @@
+{% extends "layout.html" %}
+{% set sign_in = "active" %}
+
+{% block content %}
+<div class="jumbotron bg-light mt-4">
+    <h1 class="display-4">Sign In</h1>
+    <hr class="my-4">
+    <form action="" method="POST">
+        {{ form.hidden_tag() }}
+        <div class="form-group">
+            {{ form.username.label(class="form-control-label") }}
+            {% if form.username.errors %}
+            {{ form.username(class="form-control form-control-lg is-invalid") }}
+            <div class="invalid-feedback">
+                {% for error in form.username.errors %}
+                <span>{{ error }}</span>
+                {% endfor %}
+            </div>
+            {% else %}
+            {{ form.username(class="form-control") }}
+            {% endif %}
+        </div>
+        <div class="form-group ">
+            {{ form.password.label(class="form-control-label") }}
+            {% if form.password.errors %}
+            {{ form.password(class="form-control form-control-lg is-invalid") }}
+            <div class="invalid-feedback">
+                {% for error in form.password.errors %}
+                <span>{{ error }}</span>
+                {% endfor %}
+            </div>
+            {% else %}
+            {{ form.password(class="form-control") }}
+            {% endif %}
+        </div>
+        <div class="custom-control custom-checkbox">
+            {{ form.remember_me(class="custom-control-input") }}
+            {{ form.remember_me.label(class="custom-control-label") }}
+        </div>
+        {{ form.submit(class="btn btn-outline-primary btn-block btn-lg mt-4") }}
+        <h3 id="or">OR</h3>
+        <div id="gSignIn"></div>
+    </form>
+</div>
+{% endblock content %}
+
+{% block endBody %}
+<script>
+    function invokePromise(auth2Init) {
+        auth2Init.then(() => {
+            renderButton();
+        }).catch(e => console.log(e));
+    }
+
+    function renderButton() {
+        gapi.signin2.render('gSignIn', {
+            width: "auto",
+            height: 40,
+            longtitle: true,
+            theme: 'dark',
+            onsuccess: (googleUser) => {
+                var profile = googleUser.getBasicProfile();
+                var id_token = googleUser.getAuthResponse().id_token;
+
+                $.ajax({
+                    method: "POST",
+                    contentType: "application/x-www-form-urlencoded",
+                    async: true,
+                    url: `/api/check_user/`,
+                    data: {
+                        email: profile.getEmail()
+                    },
+                    success: (response) => (response.Exists) ? login(profile, id_token) : createNewAccount(profile, id_token),
+                    error: (err) => console.error(error)
+                });
+            },
+            onfailure: (err) => {
+                console.log(err);
+            }
+        });
+
+        var flashed = document.getElementById("flashed");
+
+        if (flashed) {
+            flashed.remove();
+        }
+
+
+        function login(profile, id_token) {
+            $.ajax({
+                method: "POST",
+                contentType: "application/x-www-form-urlencoded",
+                async: true,
+                url: `/authorized/`,
+                data: {
+                    id_token
+                },
+                success: (response) => {
+                    console.log("logged in");
+                    console.log(response);
+                    flash(response.message, response.category);
+                    setTimeout(() => (window.location.href = response.redirect), 2000);
+                },
+                error: (error) => {
+                    console.log("error !");
+                }
+            });
+        }
+
+
+        function createNewAccount(profile, id_token) {
+            var modal_object = {
+                callback: function (e) {
+                    e.preventDefault();
+                    console.log(this);
+                    $('.modal').modal('hide');
+
+                    if ($("#password").val() == $("#confirm_password").val()) {
+                        $.ajax({
+                            method: "POST",
+                            contentType: "application/x-www-form-urlencoded",
+                            async: true,
+                            url: `/authorized/`,
+                            data: {
+                                id_token,
+                                password: $("#confirm_password").val()
+                            },
+                            success: (response) => {
+                                console.log("logged in");
+                                console.log(response);
+                                flash(response.message, response.category);
+                                setTimeout(() => (window.location.href = response.redirect), 2000);
+                            },
+                            error: (error) => {
+                                console.log("error !");
+                            }
+                        });
+                    }
+                }
+            }
+            createModal(modal_object);
+            $(".modal").modal({
+                backdrop: 'static',
+                keyboard: false
+            });
+        }
+
+        function flash(message, category) {
+            var div = document.createElement("div");
+            div.setAttribute("class", "alert alert-" + category + " col-md-9 m-auto");
+            div.setAttribute("role", "alert");
+            div.setAttribute("id", "flashed");
+            div.innerText = message;
+
+            document.getElementById("content").appendChild(div);
+        }
+
+
+        function createModal(modal_object) {
+            var div1 = document.createElement("div");
+            var div2 = document.createElement("div");
+            var div3 = document.createElement("div");
+            var div4 = document.createElement("div");
+            var div5 = document.createElement("div");
+            var div6 = document.createElement("div");
+            var div7 = document.createElement("div");
+            var div8 = document.createElement("div");
+            var h5 = document.createElement("h5");
+            var btn = document.createElement("button");
+            var form = document.createElement("form");
+            var input1 = document.createElement("input");
+            var input2 = document.createElement("input");
+            var br = document.createElement("br");
+
+            div1.setAttribute("class", "modal fade");
+            div1.setAttribute("tabindex", "-1");
+            div1.setAttribute("role", "dialog");
+
+            div2.setAttribute("class", "modal-dialog");
+            div2.setAttribute("role", "document");
+
+            div3.setAttribute("class", "modal-content");
+            div4.setAttribute("class", "modal-header");
+
+            div5.setAttribute("class", "modal-body");
+            div5.appendChild(form);
+            input1.setAttribute("type", "password");
+            input1.setAttribute("class", "form-control");
+            input1.setAttribute("placeholder", "Password");
+            input1.setAttribute("id", "password");
+
+            input1.addEventListener("keyup", function () {
+                if (this.value != input2.value) {
+                    this.classList.add("is-invalid");
+                    this.classList.remove("is-valid");
+                    div7.classList.add("invalid-feedback");
+                    div7.classList.remove("valid-feedback");
+                    div7.innerHTML = "not match";
+                    div8.classList.add("invalid-feedback");
+                    div8.classList.remove("valid-feedback");
+                    div8.innerHTML = "not match";
+                    input2.classList.add("is-invalid");
+                    input2.classList.remove("is-valid");
+                } else {
+                    this.classList.remove("is-invalid");
+                    this.classList.add("is-valid");
+                    div7.classList.add("valid-feedback");
+                    div7.classList.remove("invalid-feedback");
+                    div7.innerHTML = "match";
+                    div8.classList.add("valid-feedback");
+                    div8.classList.remove("invalid-feedback");
+                    div8.innerHTML = "match";
+                    input2.classList.add("is-valid");
+                    input2.classList.remove("is-invalid");
+                }
+            });
+
+            input2.addEventListener("keyup", function () {
+                if (this.value != input1.value) {
+                    this.classList.add("is-invalid");
+                    this.classList.remove("is-valid");
+                    div7.classList.add("invalid-feedback");
+                    div7.classList.remove("valid-feedback");
+                    div7.innerHTML = "not match";
+                    div8.classList.add("invalid-feedback");
+                    div8.classList.remove("valid-feedback");
+                    div8.innerHTML = "not match";
+                    input1.classList.add("is-invalid");
+                    input1.classList.remove("is-valid");
+                } else {
+                    this.classList.remove("is-invalid");
+                    this.classList.add("is-valid");
+                    div7.classList.add("valid-feedback");
+                    div7.classList.remove("invalid-feedback");
+                    div7.innerHTML = "match";
+                    div8.classList.add("valid-feedback");
+                    div8.classList.remove("invalid-feedback");
+                    div8.innerHTML = "match";
+                    input1.classList.add("is-valid");
+                    input1.classList.remove("is-invalid");
+                }
+            });
+
+            input2.setAttribute("type", "password");
+            input2.setAttribute("class", "form-control");
+            input2.setAttribute("placeholder", "Confirm Password");
+            input2.setAttribute("id", "confirm_password");
+
+            form.appendChild(input1);
+            form.appendChild(div7);
+            form.appendChild(br);
+            form.appendChild(input2);
+            form.appendChild(div8);
+
+            div6.setAttribute("class", "modal-footer");
+
+            h5.setAttribute("class", "modal-title");
+            h5.innerText = "Create Account";
+
+
+            btn.setAttribute("class", "btn btn-primary");
+            btn.innerHTML = "Create";
+            btn.addEventListener("click", modal_object.callback);
+
+            div1.appendChild(div2);
+            div2.appendChild(div3);
+            div3.appendChild(div4);
+            div3.appendChild(div5);
+            div3.appendChild(div6);
+            div4.appendChild(h5);
+            div6.appendChild(btn);
+
+            document.body.insertBefore(div1, document.getElementById("container"));
+
+            $('.modal').on('hidden.bs.modal', function () {
+                div1.remove();
+            });
+        }
+
+    }
+</script>
+{% endblock endBody %}

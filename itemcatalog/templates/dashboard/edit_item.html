@@ -1,0 +1,81 @@
+{% extends "dashboard/dashboard_layout.html" %}
+
+{% block head %}
+<!-- editor style -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/froala/froala_editor.pkgd.min.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/froala/froala_editor.min.css') }}">
+<!-- font-awesome -->
+<!-- <link rel="stylesheet" href="{{ url_for('static', filename='css/font-awesome/all.min.css') }}"> -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.4.0/css/font-awesome.min.css" rel="stylesheet" type="text/css" />
+
+{% endblock head %}
+
+{% block content %}
+<div class="jumbotron bg-light">
+    <h1 class="display-4">Add Item</h1>
+    <hr class="my-4">
+    <form action="" method="post">
+        {{ form.hidden_tag() }}
+        <div class="form-group">
+            {{ form.name.label(class="form-control-label") }}
+            {% if form.name.errors %}
+            {{ form.name(class="form-control form-control-lg is-invalid") }}
+            <div class="invalid-feedback">
+                {% for error in form.name.errors %}
+                <span>{{ error }}</span>
+                {% endfor %}
+            </div>
+            {% else %}
+            {{ form.name(class="form-control form-control") }}
+            {% endif %}
+        </div>
+        <div class="form-group">
+            {% if form.description.errors %}
+            {{ form.description(class="form-control is-invalid", id="edit") }}
+            <div class="invalid-feedback">
+                {% for error in form.description.errors %}
+                <span>{{ error }}</span>
+                {% endfor %}
+            </div>
+            {% else %}
+            {{ form.description(class="form-control form-control", id="edit") }}
+            {% endif %}
+        </div>
+        <div class="form-group">
+            {{ form.category.label(class="form-control-label") }}
+            {% if form.category.errors %}
+            {{ form.category(class="form-control is-invalid") }}
+            <div class="invalid-feedback">
+                {% for error in form.category.errors %}
+                <span>{{ error }}</span>
+                {% endfor %}
+            </div>
+            {% else %}
+            {{ form.category(class="form-control form-control") }}
+            {% endif %}
+        </div>
+        {{ form.submit(class="btn btn-outline-warning btn-block btn-lg mt-4") }}
+    </form>
+</div>
+{% endblock content %}
+
+{% block endBody %}
+<script src="{{ url_for('static', filename='js/froala/froala_editor.pkgd.min.js') }}"></script>
+<script>
+    $(function () {
+        $('#edit').froalaEditor({
+            // Set the video upload URL.
+            emoticonsUseImage: false,
+            codeMirror: false,
+            fileUpload: false,
+            imageUpload: false,
+            fontSize: ['8', '10', '12', '14', '18', '30', '60'],
+            height: 300,
+            htmlExecuteScripts: false,
+            toolbarButtons: ['fullscreen', 'bold', 'italic', 'underline', 'strikeThrough', '|', 'fontFamily', 'fontSize', 'color', '-', 'paragraphFormat', 'align', 'formatOL', 'formatUL', '|', 'insertLink', 'insertImage', 'insertTable', '-', 'emoticons', 'fontAwesome', 'specialCharacters', 'insertHR', 'selectAll', 'help', '|', 'undo', 'redo'],
+            pluginsEnabled: ['align', 'charCounter', 'colors', 'emoticons', 'entities', 'fontAwesome', 'fontFamily', 'fontSize', 'fullscreen', 'image', 'imageTUI', 'imageManager', 'lineBreaker', 'lineHeight', 'link', 'lists', 'paragraphStyle', 'quote', 'save', 'table', 'url', 'video', 'wordPaste'],
+            placeholderText: 'Description.....'
+        });
+    });
+</script>
+{% endblock endBody %}

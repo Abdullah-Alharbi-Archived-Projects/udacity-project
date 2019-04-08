@@ -1,0 +1,65 @@
+{# check layout.html for more information about template inheritance #}
+{% extends "layout.html" %}
+
+{% block content %}
+<div class="jumbotron col-md-8 bg-light">
+    <h1 class="display-4">Items in {{ category.name }}</h1>
+    {# if the user is logged in and the user was who created this category #}
+    {% if current_user.is_authenticated and category.user_id == current_user.id %}
+    {# 1. head section #}
+    {% block head %}
+    <!-- font-awesome library -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.4.0/css/font-awesome.min.css" rel="stylesheet"
+        type="text/css" />
+    {% endblock head %}
+    {# 2. add this to content section #}
+    <div class="actions float-right">
+        {# edit button #}
+        <a href="{{ url_for('editCategoryById', c_id=category.id) }}" class="btn btn-secondary btn-sm" data-toggle="tooltip"
+            data-placement="bottom" title="Edit">
+            <i class="fa fa-edit"></i>
+        </a>
+        {# delete button #}
+        <a href="{{ url_for('deleteCategoryById', c_id=category.id) }}" class="btn btn-danger btn-sm" data-toggle="tooltip"
+            data-placement="top" title="Delete" id="delete">
+            <i class="fa fa-trash"></i>
+        </a>
+    </div>
+    {% block endBody %}
+<script>
+    {# this will active the tooltip #}
+    $(function () {
+        $('[data-toggle="tooltip"]').tooltip()
+    });
+
+    {# when the user click on delete button this event will fire #}
+    $("#delete").on("click", function (e) {
+        {# prevent the browser to refresh #}
+        e.preventDefault();
+        {# ask the user #}
+        ask = confirm("Hey {{ current_user.username }}, are you sure to delete this category with items ?");
+        {# if the user clicked on `ok` confirm function will return true #}
+        if (ask) {
+            {# send the user to the delete category route #}
+            window.location.href = $(this).attr("href");
+        } else {
+            {# this will automatically refresh the page when the user clicked on cancel #}
+            window.location.href = window.location.href;
+        }
+    });
+</script>
+    {% endblock endBody %}
+    {% endif %}
+    <hr class="my-4">
+    {# if there's items render them #}
+    {% if category.items.count() > 0 %}
+    <ul>
+        {% for item in items %}
+        <li><a href="{{ url_for('item', c_id=category.id, t_id=item.id) }}">{{ item.name }}</a></li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <h3>No items in this category yet.</h3>
+    {% endif %}
+</div>
+{% endblock content %}
