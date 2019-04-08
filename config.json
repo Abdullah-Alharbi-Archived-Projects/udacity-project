@@ -5,7 +5,7 @@
     "debug_mode": true,
     "secret_key": "233f1b0f974c83f6a5d10348f2068b0783e38e4b69c90513",
     "google_oauth2": {
-        "client_id": "905113511477-0t0jur00mp375qtvhtnca19v97mmtvao.apps.googleusercontent.com",
-        "client_secret": "YwGsayYh-ysXgrbCrW1yI0Z8"
+        "client_id": "___",
+        "client_secret": "___"
     }
 }
